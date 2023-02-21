@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IAT Augmented Action</title>
+    <script src="https://dl.dropbox.com/s/bay4s10fpgpo3xg/jspsych.js"></script>
+    <script src="https://dl.dropbox.com/s/lnxloe037skya75/plugin-preload.js"></script>
+    <script src="https://dl.dropbox.com/s/1f61qegpyuhtzrj/plugin-html-keyboard-response.js"></script>
+    <script src="https://dl.dropbox.com/s/7fk1633ihnvcxqa/plugin-html-button-response.js"></script>
+    <script src="https://dl.dropbox.com/s/h5heekn4yvqh091/plugin-survey.js"></script>
+    <script src="https://dl.dropbox.com/s/xr0l1qqhuaaavm6/plugin-iat-html.js"></script>
+    <script src="https://dl.dropbox.com/s/o3xxbta57ntlyof/plugin-iat-image.js"></script>
+    <link href="https://dl.dropbox.com/s/dsqp4i4po1akrww/survey.css" rel="stylesheet">
+    <link href="https://dl.dropbox.com/s/ij96hrjaeatxmc4/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body></body>
+  <script>
+      function saveData(data, name){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'write_data.php');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({filedata: data, filename: name}));
+      }
+
+      //Source: https://gist.github.com/ScottKaye/5158488
+      function getURLParameter(name) {
+	      return decodeURI((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]);
+      }
+      function hideURLParams() {
+	      //Parameters to hide (ie ?success=value, ?error=value, etc)
+	      var hide = ['ID','DCScore'];
+	      for(var h in hide) {
+		      if(getURLParameter(h)) {
+			      history.replaceState(null, document.getElementsByTagName("title")[0].innerHTML, window.location.pathname);
+		      }
+	      }
+      }
+      window.onload = hideURLParams;
+
+      var jsPsych = initJsPsych({
+      });
+
+      var queryString = window.location.search;
+      var urlParams = new URLSearchParams(queryString);
+      var randomIDNumber = parseInt(urlParams.get('ID'));
+      var dCScore = parseFloat(urlParams.get('DCScore'));
+
+      if (!randomIDNumber) {
+        randomIDNumber = parseInt(sessionStorage.getItem("randomIDNumber"));
+      }
+
+      if (!dCScore) {
+        dCScore = parseFloat(sessionStorage.getItem("DCScore"));
+      }
+
+      sessionStorage.setItem("randomIDNumber", randomIDNumber);
+      sessionStorage.setItem("DCScore", dCScore);
+
+      var timeline = [];
+
+      var images = ['https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1',
+      'https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1',
+      'https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1',
+      'https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1',
+      'https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1',
+      'https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1',
+      'https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1',
+      'https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1',
+      'https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1',
+      'https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1',
+      'https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1',
+      'https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1'];
+
+      var preload = {
+        type: jsPsychPreload,
+        images: images
+      };
+      timeline.push(preload);
+
+      var welcome = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: '<p>Welcome to the Implicit Association Test (IAT)!</p>' +
+        '<p>Please sort the words and pictures as quickly as possible</p>' +
+        '<p><strong>THIS IS THE SECOND OF THREE IATS</strong></p>' +
+        '<p><strong>Press SPACE to start</strong></p>'
+      };
+      timeline.push(welcome);
+
+      var overview = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: '<p>Use the <strong>"E"</strong> and <strong>"I"</strong> computer keys to sort items into the correct group as fast as possible.</p><p>' +
+        '<strong>Good:</strong> Smiling, Delight, Beautiful, Friend, Appealing, Glad, Magnificent, Love</p><p>' +
+        '<strong>Bad:</strong> Disaster, Pain, Annoy, Awful, Disgust, Tragic, Angry, Horrific</p>' +
+        '<strong>Augmented:</strong><br>' +
+        "<img src='https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1' style = height:150px width:auto></img><p>" +
+        '</p><strong>Non-Augmented:</strong><br>' +
+        "<img src='https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1' style = height:150px width:auto></img>  " +
+        "<img src='https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1' style = height:150px width:auto></img><br>" +
+        "<strong>PRESS SPACE TO CONTINUE</strong>"
+      };
+      timeline.push(overview);
+
+      var previewfor1 = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: "<div style='position: absolute; top: 5%; left: 20%'><p>Press <strong>E</strong> for:<br><strong>AUGMENTED</strong></p></div>" +
+        "<div style='position: absolute; top: 5%; right: 20%'><p>Press <strong>I</strong> for:<br><strong>NON-AUGMENTED</strong></p></div>" +
+        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>" +
+        "<strong>PART 1 OF 7</strong><br><br>" +
+        "Press the <strong>E</strong> key for items that belong to the <strong>Augmented Human</strong> category.<br>" +
+        "Press the <strong>I</strong> key for items that belong to the <strong>Non-Augmented Human</strong> category.<br><br>" + 
+        "If you make a mistake, an <strong style = color:red;>X</strong> will appear.<br><br>" +
+        "Proceed as quickly as possible, yet remain focused and precise.<br><br> " +
+        "<strong>PRESS SPACE TO CONTINUE</strong></div>",
+      };
+      timeline.push(previewfor1);
+
+      var trial1 = {
+        timeline: [
+          {
+            type: jsPsychIatImage,
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            stim_key_association: jsPsych.timelineVariable('stim_key_association'),
+            html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
+            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            force_correct_key_press: true,
+            display_feedback: true,
+            trial_duration: 3000,
+            left_category_key: 'E',
+            right_category_key: 'I',
+            left_category_label: ['AUGMENTED'],
+            right_category_label: ['NON-AUGMENTED'],
+            response_ends_trial: true,
+            data: { iat_type: 'practice' }
+          }
+        ],
+        timeline_variables: [
+          {stimulus: "https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1", stim_key_association: "right"}
+        ],
+        randomize_order: true,
+        repetitions: 2
+      };
+      timeline.push(trial1);
+
+      var previewfor2 = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: "<div style='position: absolute; top: 5%; left: 20%'><p>Press <strong>E</strong> for:<br><strong>BAD</strong></p></div>" +
+        "<div style='position: absolute; top: 5%; right: 20%'><p>Press <strong>I</strong> for:<br><strong>GOOD</strong></p></div>" +
+        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>" +
+        "<strong>PART 2 OF 7</strong><br><br>" +
+        "Press the <strong>E</strong> key for items that belong to the <strong>Bad</strong> category.<br>" +
+        "Press the <strong>I</strong> key for items that belong to the <strong>Good</strong> category.<br><br>" + 
+        "If you make a mistake, an <strong style = color:red;>X</strong> will appear.<br><br>" +
+        "Proceed as quickly as possible, yet remain focused and precise.<br><br> " +
+        "<strong>PRESS SPACE TO CONTINUE</strong></div>",
+      };
+      timeline.push(previewfor2);
+
+      var trial2 = {
+        timeline: [
+          {
+            type: jsPsychIatHtml,
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            stim_key_association: jsPsych.timelineVariable('stim_key_association'),
+            html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
+            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            force_correct_key_press: true,
+            display_feedback: true,
+            trial_duration: 3000,
+            left_category_key: 'E',
+            right_category_key: 'I',
+            left_category_label: ['BAD'],
+            right_category_label: ['GOOD'],
+            response_ends_trial: true,
+            data: { iat_type: 'practice' }
+          }
+        ],
+        timeline_variables: [
+          {stimulus: "Disaster", stim_key_association: "left"},
+          {stimulus: "Pain", stim_key_association: "left"},
+          {stimulus: "Annoy", stim_key_association: "left"},
+          {stimulus: "Awful", stim_key_association: "left"},
+          {stimulus: "Disgust", stim_key_association: "left"},
+          {stimulus: "Tragic", stim_key_association: "left"},
+          {stimulus: "Angry", stim_key_association: "left"},
+          {stimulus: "Horrific", stim_key_association: "left"},
+          {stimulus: "Smiling", stim_key_association: "right"},
+          {stimulus: "Beautiful", stim_key_association: "right"},
+          {stimulus: "Friendly", stim_key_association: "right"},
+          {stimulus: "Appealing", stim_key_association: "right"},
+          {stimulus: "Glad", stim_key_association: "right"},
+          {stimulus: "Magnificent", stim_key_association: "right"},
+          {stimulus: "Lovely", stim_key_association: "right"},
+          {stimulus: "Joyous", stim_key_association: "right"}
+        ],
+        randomize_order: true,
+        repetitions: 2
+      };
+      timeline.push(trial2);
+
+      var previewfor3 = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: "<div style='position: absolute; top: 8.2%; left: 20%'>Press <strong>E</strong> for:<br><strong>BAD</strong><br> or<br> <strong>AUGMENTED</strong></div>" +
+        "<div style='position: absolute; top: 8.2%; right: 20%'> Press <strong>I</strong> for:<br> <strong>GOOD</strong><br> or<br> <strong>NON-AUGMENTED</strong></div>" +
+        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>" +
+        "<strong>PART 3 OF 7</strong><br><br>" +
+        "Use <strong>E</strong> for <strong>Bad</strong> and for <strong>Augmented People</strong><br>" +
+        "Use <strong>I</strong> for <strong>Good</strong> and for <strong>Non-Augmented People</strong><br>" +
+        "Each item belongs to only one category.<br><br>" +
+        "If you make a mistake, an <strong style = color:red;>X</strong> will appear.<br><br>" +
+        "Proceed as quickly as possible, yet remain focused and precise.<br><br> " +
+        "<strong>PRESS SPACE TO CONTINUE</strong></div>",
+      };
+      timeline.push(previewfor3);
+
+      var trial3 = {
+      timeline: [
+        {
+          type: jsPsych.timelineVariable('type'),
+          stimulus: jsPsych.timelineVariable('stimulus'),
+          stim_key_association: jsPsych.timelineVariable('stim_key_association'),
+          html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
+          bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+          force_correct_key_press: true,
+          display_feedback: true,
+          trial_duration: 3000,
+          left_category_key: 'E',
+          right_category_key: 'I',
+          left_category_label: ['BAD', 'AUGMENTED'],
+          right_category_label: ['GOOD', 'NON-AUGMENTED'],
+          response_ends_trial: true,
+          data: { iat_type: 'bad-augmentedfirst' }
+        }
+      ],
+        timeline_variables: [
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Disaster", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Annoy", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Awful", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Disgust", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Tragic", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Horrific", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Smiling", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Beautiful", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Friendly", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Appealing", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Glad", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Magnificent", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Lovely", stim_key_association: "right"}
+        ],
+        randomize_order: true,
+        repetitions: 1
+      };
+      timeline.push(trial3);
+
+      var previewfor4 = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: "<div style='position: absolute; top: 8.2%; left: 20%'>Press <strong>E</strong> for:<br><strong>BAD</strong><br> or<br> <strong>AUGMENTED</strong></div>" +
+        "<div style='position: absolute; top: 8.2%; right: 20%'> Press <strong>I</strong> for:<br> <strong>GOOD</strong><br> or<br> <strong>NON-AUGMENTED</strong></div>" +
+        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'><strong>PART 4 OF 7</strong><br>" +
+        "This is the same as the previous part.<br><br>" +
+        "Use <strong>E</strong> for <strong>Bad</strong> and for <strong>Augmented People</strong><br>" +
+        "Use <strong>I</strong> for <strong>Good</strong> and for <strong>Non-Augmented People</strong><br>" +
+        "Each item belongs to only one category.<br><br>" +
+        "If you make a mistake, an <strong style = color:red;>X</strong> will appear.<br><br>" +
+        "Proceed as quickly as possible, yet remain focused and precise.<br><br>" +
+        "<strong>PRESS SPACE TO CONTINUE</strong></div>",
+      };
+      timeline.push(previewfor4);
+
+      var trial4 = {
+      timeline: [
+        {
+          type: jsPsych.timelineVariable('type'),
+          is_html: jsPsych.timelineVariable('is_html'),
+          stimulus: jsPsych.timelineVariable('stimulus'),
+          stim_key_association: jsPsych.timelineVariable('stim_key_association'),
+          html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
+          bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+          force_correct_key_press: true,
+          display_feedback: true,
+          trial_duration: 3000,
+          left_category_key: 'E',
+          right_category_key: 'I',
+          left_category_label: ['BAD', 'AUGMENTED'],
+          right_category_label: ['GOOD', 'NON-AUGMENTED'],
+          response_ends_trial: true,
+          data: { iat_type: 'bad-augmented' }
+        }
+      ],
+        timeline_variables: [
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Disaster", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Annoy", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Awful", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Disgust", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Tragic", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Horrific", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Smiling", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Beautiful", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Friendly", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Appealing", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Glad", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Magnificent", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Lovely", stim_key_association: "right"}
+        ],
+        randomize_order: true,
+        repetitions: 2
+      };
+      timeline.push(trial4);
+
+      var previewfor5 = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: "<div style='position: absolute; top: 8.2%; left: 20%'>Press <strong>E</strong> for:<br>" + "<strong>NON-AUGMENTED</strong></div>" +
+        "<div style='position: absolute; top: 8.2%; right: 20%'>Press <strong>I</strong> for:<br>" + "<strong>AUGMENTED</strong></div>" +
+        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'><strong>PART 5 OF 7</strong><br>" +
+        "<strong style = color:red;>Attention!</strong> The labels have changed positions!<br><br>" +
+        "Use <strong>E</strong> for <strong>Non-Augmented People</strong><br>" +
+        "Use <strong>I</strong> for <strong>Augmented People</strong><br><br>" +
+        "If you make a mistake, an <strong style = color:red;>X</strong> will appear.<br><br>" +
+        "Proceed as quickly as possible, yet remain focused and precise.<br><br> " +
+        "<strong>PRESS SPACE TO CONTINUE</strong></div>"
+      };
+      timeline.push(previewfor5);
+
+      var trial5 = { 
+        timeline: [
+          {
+            type: jsPsychIatImage,
+            is_html: false,
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            stim_key_association: jsPsych.timelineVariable('stim_key_association'),
+            html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
+            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            force_correct_key_press: true,
+            display_feedback: true,
+            trial_duration: 3000,
+            left_category_key: 'E',
+            right_category_key: 'I',
+            left_category_label: ['NON-AUGMENTED'],
+            right_category_label: ['AUGMENTED'],
+            response_ends_trial: true,
+            data: { iat_type: 'practice' }
+          }
+        ],
+        timeline_variables: [
+          {stimulus: "https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1", stim_key_association: "right"},
+          {stimulus: "https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1", stim_key_association: "left"},
+          {stimulus: "https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1", stim_key_association: "left"}
+        ],
+        randomize_order: true,
+        repetitions: 2
+      };
+      timeline.push(trial5);
+
+      var previewfor6 = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: "<div style='position: absolute; top: 8.2%; left: 20%'>Press <strong>E</strong> for:<br><strong>BAD</strong><br> or<br> <strong>NON-AUGMENTED</strong></div>" +
+        "<div style='position: absolute; top: 8.2%; right: 20%'> Press <strong>I</strong> for:<br> <strong>GOOD</strong><br> or<br> <strong>AUGMENTED</strong></div>" +
+        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>" +
+        "<strong>PART 6 OF 7</strong><br><br>" +
+        "Use <strong>E</strong> for <strong>Bad</strong> and for <strong>Non-Augmented People</strong><br>" +
+        "Use <strong>I</strong> for <strong>Good</strong> and for <strong>Augmented People</strong><br>" +
+        "Each item belongs to only one category.<br><br>" +
+        "If you make a mistake, an <strong style = color:red;>X</strong> will appear.<br><br>" +
+        "Proceed as quickly as possible, yet remain focused and precise.<br><br> " +
+        "<strong>PRESS SPACE TO CONTINUE</strong></div>",
+      };
+      timeline.push(previewfor6)
+
+      var trial6 = {
+        timeline: [
+          {
+            type: jsPsych.timelineVariable('type'),
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            stim_key_association: jsPsych.timelineVariable('stim_key_association'),
+            html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
+            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            force_correct_key_press: true,
+            display_feedback: true,
+            trial_duration: 3000,
+            left_category_key: 'E',
+            right_category_key: 'I',
+            left_category_label: ['BAD', 'NON-AUGMENTED'],
+            right_category_label: ['GOOD', 'AUGMENTED'],
+            response_ends_trial: true,
+            data: {iat_type: 'bad-nonaugmentedfirst'}
+          }
+        ],
+        timeline_variables: [
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Disaster", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Annoy", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Awful", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Disgust", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Tragic", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Horrific", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Smiling", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Beautiful", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Friendly", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Appealing", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Glad", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Magnificent", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Lovely", stim_key_association: "right"}
+        ],
+        randomize_order: true,
+        repetitions: 1
+      };
+      timeline.push(trial6);
+
+      var previewfor7 = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: "<div style='position: absolute; top: 8.2%; left: 20%'>Press <strong>E</strong> for:<br><strong>BAD</strong><br> or<br> <strong>NON-AUGMENTED</strong></div>" +
+        "<div style='position: absolute; top: 8.2%; right: 20%'> Press <strong>I</strong> for:<br> <strong>GOOD</strong><br> or<br> <strong>AUGMENTED</strong></div>" +
+        "<div style='position: relative; top: 42%; margin-left: auto; margin-right: auto'>" +
+        "<strong>PART 7 OF 7</strong><br><br>" +
+        "Use <strong>E</strong> for <strong>Bad</strong> and for <strong>Non-Augmented People</strong><br>" +
+        "Use <strong>I</strong> for <strong>Good</strong> and for <strong>Augmented People</strong><br>" +
+        "Each item belongs to only one category.<br><br>" +
+        "If you make a mistake, an <strong style = color:red;>X</strong> will appear.<br><br>" +
+        "Proceed as quickly as possible, yet remain focused and precise.<br><br> " +
+        "<strong>PRESS SPACE TO CONTINUE</strong></div>",
+      };
+      timeline.push(previewfor7)
+
+      var trial7 = {
+        timeline: [
+          {
+            type: jsPsych.timelineVariable('type'),
+            is_html: jsPsych.timelineVariable('is_html'),
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            stim_key_association: jsPsych.timelineVariable('stim_key_association'),
+            html_when_wrong: '<span style="color: red; font-size: 80px">X</span>',
+            bottom_instructions: '<p>If you press the wrong key, a red X will appear. Press the other key to continue</p>',
+            force_correct_key_press: true,
+            display_feedback: true,
+            trial_duration: 3000,
+            left_category_key: 'E',
+            right_category_key: 'I',
+            left_category_label: ['BAD', 'NON-AUGMENTED'],
+            right_category_label: ['GOOD', 'AUGMENTED'],
+            response_ends_trial: true,
+            data: {iat_type: 'bad-nonaugmented'}
+          }
+        ],
+        timeline_variables: [
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/1lw29r0kgr24g95/AA1.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/o02f8gavy5oyei4/AA2.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/rwfhunir8j3utj5/AA3.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/33p1u648tnrofjx/AA4.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/qw5ff1kp422uh89/AA5.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/wkf5swom25m3mgx/AA6.png?raw=1", stim_key_association: "right"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/htqrpkwppmngbs7/NA1.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/zqqgl5bsbobhis5/NA2.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/4eyqbnkhme8ydpk/NA3.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/b0iucgezq2oqj2f/NA4.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/0jmy8knwj3wb095/NA5.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatImage, stimulus: "https://www.dropbox.com/s/76rgowws4jkuca5/NA6.png?raw=1", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Disaster", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Pain", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Annoy", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Awful", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Disgust", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Tragic", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Angry", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Horrific", stim_key_association: "left"},
+          {type: jsPsychIatHtml, stimulus: "Smiling", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Joyous", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Beautiful", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Friendly", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Appealing", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Glad", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Magnificent", stim_key_association: "right"},
+          {type: jsPsychIatHtml, stimulus: "Lovely", stim_key_association: "right"}
+        ],
+        randomize_order: true,
+        repetitions: 2,
+      };
+      timeline.push(trial7);
+
+      var dScore;
+      var BA;
+      var BN;
+      var UBA;
+      var UBN;
+
+      var summary = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: "NO_KEYS",
+        trial_duration: 10,
+        stimulus: function() {
+          //Step 2 + 5
+          //B3
+          var badaugmentedfirst = jsPsych.data.get().filter({iat_type: 'bad-augmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 });
+          var mean_correct_responses_badaugmentedfirst = badaugmentedfirst.filter({correct: true}).select('rt').mean();
+          //B4
+          var badaugmented = jsPsych.data.get().filter({iat_type: 'bad-augmented'}).filterCustom(function(x) { return x.rt < 10000 });
+          var mean_correct_responses_badaugmented = badaugmented.filter({correct: true}).select('rt').mean();
+          //B6
+          var badnonaugmentedfirst = jsPsych.data.get().filter({iat_type: 'bad-nonaugmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 });
+          var mean_correct_responses_badnonaugmentedfirst = badnonaugmentedfirst.filter({correct: true}).select('rt').mean();
+          //B7
+          var badnonaugmented = jsPsych.data.get().filter({iat_type: 'bad-nonaugmented'}).filterCustom(function(x) { return x.rt < 10000 });
+          var mean_correct_responses_badnonaugmented = badnonaugmented.filter({correct: true}).select('rt').mean();
+
+          //Step 6
+          //B3 + B6
+          var sd1 = badaugmentedfirst.join(badnonaugmentedfirst).select('rt').sd();
+          //B4 + B7
+          var sd2 = badaugmented.join(badnonaugmented).select('rt').sd();
+
+          //Step 7 + 9
+          //B3
+          var replacementb3 = mean_correct_responses_badaugmentedfirst + 600;
+          var badaugmentedfirstreplacement = jsPsych.data.get().filter({iat_type: 'bad-augmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: false}).select('rt');
+          var amountfalseb3 = badaugmentedfirstreplacement.count();
+          var badaugmentedfirstreplacementtrue = jsPsych.data.get().filter({iat_type: 'bad-augmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: true}).select('rt');
+          var amounttrueb3 = badaugmentedfirstreplacementtrue.count();
+          //B4
+          var replacementb4 = mean_correct_responses_badaugmented + 600;
+          var badaugmentedreplacement = jsPsych.data.get().filter({iat_type: 'bad-augmented'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: false}).select('rt');
+          var amountfalseb4 = badaugmentedreplacement.count();
+          var badaugmentedreplacementtrue = jsPsych.data.get().filter({iat_type: 'bad-augmented'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: true}).select('rt');
+          var amounttrueb4 = badaugmentedreplacementtrue.count();
+          //B6
+          var replacementb6 = mean_correct_responses_badnonaugmentedfirst + 600;
+          var badnonaugmentedfirstreplacement = jsPsych.data.get().filter({iat_type: 'bad-nonaugmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: false}).select('rt');
+          var amountfalseb6 = badnonaugmentedfirstreplacement.count();
+          var badnonaugmentedfirstreplacementtrue = jsPsych.data.get().filter({iat_type: 'bad-nonaugmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: true}).select('rt');
+          var amounttrueb6 = badnonaugmentedfirstreplacementtrue.count();
+          //B7
+          var replacementb7 = mean_correct_responses_badnonaugmented + 600;
+          var badnonaugmentedreplacement = jsPsych.data.get().filter({iat_type: 'bad-nonaugmented'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: false}).select('rt');
+          var amountfalseb7 = badnonaugmentedreplacement.count();
+          var badnonaugmentedreplacementtrue = jsPsych.data.get().filter({iat_type: 'bad-nonaugmented'}).filterCustom(function(x) { return x.rt < 10000 }).filter({correct: true}).select('rt');
+          var amounttrueb7 = badnonaugmentedreplacementtrue.count();
+
+          var newmeanb3 = ((amounttrueb3 * mean_correct_responses_badaugmentedfirst) + (amountfalseb3 * replacementb3)) / (amounttrueb3 + amountfalseb3);
+          var newmeanb4 = ((amounttrueb4 * mean_correct_responses_badaugmented) + (amountfalseb4 * replacementb4)) / (amounttrueb4 + amountfalseb4);
+          var newmeanb6 = ((amounttrueb6 * mean_correct_responses_badnonaugmentedfirst) + (amountfalseb6 * replacementb6)) / (amounttrueb6 + amountfalseb6);
+          var newmeanb7 = ((amounttrueb7 * mean_correct_responses_badnonaugmented) + (amountfalseb7 * replacementb7)) / (amounttrueb7 + amountfalseb7);
+
+          //Step 10
+          //Difference B6 and B3
+          var diffb6b3 = newmeanb6 - newmeanb3;
+          //Difference B7 and B4
+          var diffb7b4 = newmeanb7 - newmeanb4;
+
+          //Step 11
+          //D-Score B6 and B3
+          var d1 = diffb6b3 / sd1;
+          //D-Score B7 and B4
+          var d2 = diffb7b4 / sd2;
+
+          //Step 12
+          //Average the two d-scores
+          var d = (d1 + d2) / 2;
+
+          dScore = d;
+          BA = ((28 * newmeanb3) + (56 * newmeanb4)) / 84;
+          BN = ((28 * newmeanb6) + (56 * newmeanb7)) / 84;
+          UBA = jsPsych.data.get().filter({iat_type: 'bad-augmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 }).join(jsPsych.data.get().filter({iat_type: 'bad-augmented'}).filterCustom(function(x) { return x.rt < 10000 })).select('rt').mean();
+          UBN = jsPsych.data.get().filter({iat_type: 'bad-nonaugmentedfirst'}).filterCustom(function(x) { return x.rt < 10000 }).join(jsPsych.data.get().filter({iat_type: 'bad-nonaugmented'}).filterCustom(function(x) { return x.rt < 10000 })).select('rt').mean();
+
+          return '<p style="font-size:30px;"><strong>YOU HAVE COMPLETED THE SECOND OF THREE IATS</p></strong>' +
+            "<strong>PRESS SPACE TO CONTINUE</strong>"
+        },
+      };
+      timeline.push(summary);
+
+      var summary2 = {
+        on_start: function(data){
+          if ((jsPsych.data.get().filter({correct: true}).filterCustom(function(x) { return x.rt < 300 }).select('rt').count() +
+          jsPsych.data.get().filter({correct: false}).filterCustom(function(x) { return x.rt < 300 }).select('rt').count()) < 25) {
+            saveData(jsPsych.data.get().csv(), "[A],[" + randomIDNumber + "],[" + dScore.toFixed(2) + "],[" + BA.toFixed(2) + "],[" + BN.toFixed(2) + "],[" + UBA.toFixed(2) + "],[" + UBN.toFixed(2) + "]");
+          } else {
+            saveData(jsPsych.data.get().csv(), "[ANOTVALID],[" + randomIDNumber + "],[" + dScore.toFixed(2) + "],[" + BA.toFixed(2) + "],[" + BN.toFixed(2) + "],[" + UBA.toFixed(2) + "],[" + UBN.toFixed(2) + "]");
+          }
+        },
+        type: jsPsychHtmlKeyboardResponse,
+        choices: [' '],
+        stimulus: function() {
+          return '<p style="font-size:30px;"><strong>YOU HAVE COMPLETED THE SECOND OF THREE IATS</p></strong>' +
+            "<strong>PRESS SPACE TO CONTINUE</strong>"
+        },
+      };
+      timeline.push(summary2);
+
+      var redirection = {
+        on_start: function(data){
+          window.location = "https://augmentedhci.medien.ifi.lmu.de/IATLastAugmentedSenses.html?ID=" + randomIDNumber.toString() + "&Path=" + (0).toString() + "&DCScore=" + dCScore.toString() + "&DAScore=" + dScore.toFixed(2).toString();
+        },
+        type: jsPsychHtmlKeyboardResponse,
+        choices: "NO_KEYS",
+        trial_duration: 1,
+        stimulus: 'Redirection... Please wait',
+      };
+      timeline.push(redirection);
+
+      jsPsych.run(timeline);
+  </script>
+</html>

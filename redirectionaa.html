@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>IAT Human Augmentation</title>
+	</head>
+<body>
+
+	<script>
+		
+      //Source: https://gist.github.com/ScottKaye/5158488
+      function getURLParameter(name) {
+	      return decodeURI((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]);
+      }
+      function hideURLParams() {
+	      //Parameters to hide (ie ?success=value, ?error=value, etc)
+	      var hide = ['ID','DAScore'];
+	      for(var h in hide) {
+		      if(getURLParameter(h)) {
+			      history.replaceState(null, document.getElementsByTagName("title")[0].innerHTML, window.location.pathname);
+		      }
+	      }
+      }
+      window.onload = hideURLParams;
+
+      var queryString = window.location.search;
+      var urlParams = new URLSearchParams(queryString);
+      var randomIDNumber = parseInt(urlParams.get('ID'));
+      var dAScore = parseFloat(urlParams.get('DAScore'));
+
+		  var visitorCount;
+
+      	function readCounter() {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", "read_counteraa.php", true);
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+              visitorCount = parseInt(xhr.responseText);
+              var path = visitorCount % 2;
+
+      	      var urls = new Array();
+			        urls[0] = "https://augmentedhci.medien.ifi.lmu.de/IATAAAugmentedCognition.html?ID=" + randomIDNumber.toString() + "&DAScore=" + dAScore.toString();
+	            urls[1] = "https://augmentedhci.medien.ifi.lmu.de/IATAAAugmentedSenses.html?ID=" + randomIDNumber.toString() + "&DAScore=" + dAScore.toString();
+
+              writeCounter();
+			
+          	  setTimeout(function() {
+				        window.location = urls[path];
+			        }, 1000);
+            }
+          };
+          xhr.send();
+        }
+	    readCounter();
+
+	    function writeCounter() {
+    	  var xhr = new XMLHttpRequest();
+          xhr.open("GET", "write_counteraa.php", true);
+          xhr.send();
+        }
+		
+	</script>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>IAT Human Augmentation</title>
+	</head>
+<body>
+
+	<script>
+
+function readCounter() {
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "read_counter.php", true);
+	xhr.onreadystatechange = function() {
+    	if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+    		visitorCount = parseInt(xhr.responseText);
+    		var path = visitorCount % 6;
+      
+	    	var urls = new Array();
+      		urls[0] = "https://augmentedhci.medien.ifi.lmu.de/IATAugmentedAction.html";
+    	  	urls[1] = "https://augmentedhci.medien.ifi.lmu.de/IATAugmentedAction.html";
+	      	urls[2] = "https://augmentedhci.medien.ifi.lmu.de/IATAugmentedCognition.html";
+      		urls[3] = "https://augmentedhci.medien.ifi.lmu.de/IATAugmentedCognition.html";
+    	  	urls[4] = "https://augmentedhci.medien.ifi.lmu.de/IATAugmentedSenses.html";
+	      	urls[5] = "https://augmentedhci.medien.ifi.lmu.de/IATAugmentedSenses.html";
+      
+      		writeCounter();
+
+			setTimeout(function() {
+				window.location = urls[path];
+			}, 1000);
+    	}
+  	};
+  	xhr.send();
+}
+
+readCounter();
+
+function writeCounter() {
+	var xhr = new XMLHttpRequest();
+  	xhr.open("GET", "write_counter.php", true);
+  	xhr.send();
+}
+		
+	</script>
+
+</html>
